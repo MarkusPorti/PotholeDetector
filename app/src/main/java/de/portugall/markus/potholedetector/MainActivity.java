@@ -3,7 +3,9 @@ package de.portugall.markus.potholedetector;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.util.Rational;
 import android.util.Size;
@@ -24,12 +26,15 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_PERMISSION_CODE = 10;
 
     private TextureView cameraView;
+    private DetectorView drawView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         cameraView = findViewById(R.id.texture_view);
+        drawView = findViewById(R.id.detector_view);
+        drawView.setZOrderOnTop(true);
         cameraView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -82,9 +87,32 @@ public class MainActivity extends AppCompatActivity {
 
                 cameraView.setSurfaceTexture(output.getSurfaceTexture());
                 updateTransform();
+            }
+        });
 
+        cameraView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            }
+
+            @Override
+            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+                return false;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+                // Hier bekommst du ständig updates.
                 // TODO Hier haste deine Bitmap :D
-                cameraView.getBitmap();
+                Bitmap bild = cameraView.getBitmap();
+
+                // Hiermit kannste dein Zeug zeichnen.
+                drawView.paintRectangle((float) (Math.random() * 500), (float) (Math.random() * 700), 100, 100);
             }
         });
         CameraX.bindToLifecycle(this, preview);
